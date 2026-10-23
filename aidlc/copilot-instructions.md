@@ -446,6 +446,23 @@ The Operations stage will eventually include:
 
 **Current State**: All build and test activities are handled in the CONSTRUCTION phase.
 
+### Context Summary Review
+
+Whenever an Operations stage is completed, review the new and updated context
+from Inception, Construction, and Operations against `centre-lock/SPEC.md`.
+Detailed AI-DLC artifacts remain the source of truth; the application
+`SPEC.md` is only a concise summary for efficient Copilot coding tasks.
+
+- Perform and record the review even when no summary change is warranted.
+- Update `centre-lock/SPEC.md` only for durable changes to product behavior,
+  architecture, implementation status, or coding guidance that materially
+  help future small coding tasks and are not already represented.
+- Keep the summary short. Do not copy detailed requirements, plans,
+  operational procedures, or history into it. No change is valid and
+  expected; grow it only rarely, such as after a substantial feature addition.
+- Do not present unresolved decisions or planned behavior as implemented
+  facts. If the summary changes, verify it is accurate and concise.
+
 ## Key Principles
 
 - **Adaptive Execution**: Only execute stages that add value
