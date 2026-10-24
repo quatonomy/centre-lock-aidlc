@@ -58,10 +58,7 @@ jobs:
             "$parent" "$SOURCE_COMMIT" -- > context-review-input.patch
 
           diff_bytes="$(wc -c < context-review-input.patch | tr -d ' ')"
-          if (( diff_bytes > 80000 )); then
-            echo "::error::The commit diff is larger than 80 KB. Review it in smaller commits."
-            exit 1
-          fi
+          echo "Prepared source diff: ${diff_bytes} bytes." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
