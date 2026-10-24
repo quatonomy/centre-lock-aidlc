@@ -65,13 +65,22 @@ jobs:
         with:
           node-version: 22
 
+      - name: Check Copilot authentication secret
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+        run: |
+          if [[ -z "$COPILOT_GITHUB_TOKEN" ]]; then
+            echo "::error::Set COPILOT_GITHUB_TOKEN to a token with Copilot Requests permission. The workflow GITHUB_TOKEN is not a Copilot authentication fallback."
+            exit 1
+          fi
+
       - name: Install Copilot CLI
         run: npm install --global @github/copilot@1.0.103
 
       - name: Review context and update relevant AIDLC docs
         working-directory: context-repo
         env:
-          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN || github.token }}
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
           SOURCE_COMMIT: ${{ inputs.source_commit }}
           PROMPT: |
             Review the centre-lock source change identified by commit ${{ inputs.source_commit }}.
