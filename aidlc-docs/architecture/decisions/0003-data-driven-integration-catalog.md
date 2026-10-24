@@ -26,10 +26,15 @@ the centrally managed endpoint allow-list and tenant isolation requirements.
   Standard HTTP integrations should be onboarded through catalog data rather
   than provider-specific source code. Add provider-specific code only when a
   protocol cannot be safely represented by the generic connector.
-- Do not expose catalog-management or proxy endpoints until platform-admin
-  authorization, tenant resolution, consumer API-key validation, and tenant
-  credential storage are implemented. These security boundaries are not
-  implied by the data-driven catalog decision.
+- Do not expose production catalog-management or tenant-facing proxy
+  endpoints until platform-admin authorization, tenant resolution, consumer
+  API-key validation, and tenant credential storage are implemented. These
+  security boundaries are not implied by the data-driven catalog decision.
+- A Development-only preview may expose read-only catalog/OpenAPI routes and
+  an unauthenticated proxy for enabled integrations that require no upstream
+  credentials. The proxy must enforce the catalog endpoint allow-list. These
+  routes are local-development tools, not tenant-facing APIs, and do not
+  satisfy the production security boundaries above.
 
 ## Consequences
 
