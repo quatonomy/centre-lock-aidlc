@@ -30,8 +30,7 @@ jobs:
           ref: main
           path: source/centre-lock
           fetch-depth: 0
-          # Configure CENTRE_LOCK_READ_TOKEN if centre-lock is private.
-          token: ${{ secrets.CENTRE_LOCK_READ_TOKEN || github.token }}
+          token: ${{ secrets.centre-lock-token }}
 
       - name: Validate commit and prepare its diff
         working-directory: context-repo
@@ -65,9 +64,9 @@ jobs:
         with:
           node-version: 22
 
-      - name: Check Copilot authentication secret
+      - name: Check authentication secret
         env:
-          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+          COPILOT_GITHUB_TOKEN: ${{ secrets.centre-lock-token }}
         run: |
           if [[ -z "$COPILOT_GITHUB_TOKEN" ]]; then
             echo "::error::Set COPILOT_GITHUB_TOKEN to a token with Copilot Requests permission. The workflow GITHUB_TOKEN is not a Copilot authentication fallback."
@@ -80,7 +79,7 @@ jobs:
       - name: Review context and update relevant AIDLC docs
         working-directory: context-repo
         env:
-          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+          COPILOT_GITHUB_TOKEN: ${{ secrets.centre-lock-token }}
           SOURCE_COMMIT: ${{ inputs.source_commit }}
           PROMPT: |
             Review the centre-lock source change identified by commit ${{ inputs.source_commit }}.
