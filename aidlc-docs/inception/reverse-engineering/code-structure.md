@@ -7,7 +7,7 @@
 - **API tests**: `tests/CentreLock.Api.Tests/` is a .NET test project in the solution.
 - **API contract tests**: `tests/api/` has an independent npm package and Bruno collection.
 - **Local infrastructure**: Docker Compose builds/runs the API and web image targets with PostgreSQL.
-- **CI**: GitHub Actions workflow `.github/workflows/ci.yml`.
+- **CI and automation**: GitHub Actions workflow `.github/workflows/ci.yml` runs checks; `.github/workflows/cd.yml` dispatches `context-update-review.yml` with the source commit SHA on pushes to `main`. It does not deploy the application.
 
 ## Key Modules
 
@@ -47,6 +47,7 @@
 ### Delivery files
 - `Dockerfile`, `compose.yaml` - local multi-container build and services.
 - `.github/workflows/ci.yml` - PR and main-branch checks.
+- `.github/workflows/cd.yml` - Main-branch push dispatch for context-update review; not application deployment.
 - `aidlc-docs/development/setup.md` - local setup, migrations, API/UI use, tests, and current Development-only feature limits (moved from the application folder during context consolidation).
 
 ## Existing File Inventory

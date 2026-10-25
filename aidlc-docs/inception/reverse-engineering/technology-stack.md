@@ -24,7 +24,7 @@
 - **Nginx Alpine** - Serves the built UI and proxies `/api` and `/swagger`.
 - **Hosting provider** - Not selected.
 - **Terraform** - Accepted as the intended IaC source of truth, but no Terraform configuration is present.
-- **GitHub Actions** - Current CI workflow.
+- **GitHub Actions** - CI workflow plus a main-push context-review dispatch workflow; no application deployment is configured.
 
 ## Build Tools
 

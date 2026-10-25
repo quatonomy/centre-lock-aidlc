@@ -55,7 +55,7 @@ Text alternative: In local Compose, the browser loads the React application from
 
 ### Test and CI components
 - **Purpose**: Validate application behavior and deliverable builds.
-- **Responsibilities**: xUnit and ASP.NET Core test host; optional PostgreSQL integration tests; Bruno API collection; Playwright UI tests; GitHub Actions build/test/audit workflow.
+- **Responsibilities**: xUnit and ASP.NET Core test host; optional PostgreSQL integration tests; Bruno API collection; Playwright UI tests; GitHub Actions build/test/audit workflow and main-push context-review dispatch.
 - **Type**: Test/infrastructure.
 
 ## Data Flow
@@ -110,6 +110,7 @@ Text alternative: The Development-only endpoint resolves an enabled catalog entr
 - **Containers**: Dockerfile builds a .NET API runtime and a separate Nginx web runtime from a shared build context.
 - **Local deployment**: Compose defines API, UI, and PostgreSQL services. The web Nginx configuration proxies `/api` and `/swagger` to the API service.
 - **CI**: `.github/workflows/ci.yml` runs .NET formatting and tests, PostgreSQL-backed tests, Compose/Bruno checks, and separate web lint/build/Playwright checks with npm audits.
+- **Context-review dispatch**: `.github/workflows/cd.yml` dispatches `context-update-review.yml` on pushes to `main`, passing the source commit SHA; it does not deploy the application.
 - **Not present**: No Terraform files, cloud resources, hosting-provider configuration, PR deployment environments, or production promotion workflow are tracked.
 - **Networking**: Local ports are API `8080`, UI `5173`, and PostgreSQL `5432`. These are development settings, not production deployment requirements.
 
