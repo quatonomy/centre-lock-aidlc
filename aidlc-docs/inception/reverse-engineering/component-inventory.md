@@ -2,15 +2,17 @@
 
 ## Application Components
 
-- **CentreLock.Api** - ASP.NET Core API host for health, Development catalog/OpenAPI, and Development proxy endpoints.
+- **CentreLock.Api** - ASP.NET Core API host for health/readiness, identity, operator tenant provisioning, tenant catalog read, Development catalog/OpenAPI, and Development proxy endpoints.
+- **Tenant Identity** - Google OIDC cookie sign-in, identities, tenants, and memberships (`Admin`/`Member`) in a separate EF Core context.
+- **Security middleware** - Safe exception handling, security headers/correlation ID, and cookie-session CSRF validation.
 - **Integration Catalog** - PostgreSQL-backed integration definitions, endpoint allow lists, OpenAPI documents, validation, and Star Wars seeding.
 - **Integration Proxy** - Generic outbound HTTP forwarding, endpoint matching, supported API-key/bearer auth boundary, and response capture.
-- **Development Catalog UI** - React/TypeScript browser UI for viewing integration entries and docs; not an authenticated tenant management interface.
+- **Web UI** - React/TypeScript browser UI for sign-in/out, viewing memberships, and viewing integration entries and docs; not a tenant management interface.
 
 ## Data Components
 
-- **PostgreSQL** - Local Compose database. Current persistence is limited to the integration catalog and its allowed endpoints.
-- **EF Core migration** - Initial catalog schema migration; schema updates are intended to be controlled migration steps rather than app-startup migrations.
+- **PostgreSQL** - Local Compose database and a shared non-production Cloud SQL instance. Persistence covers the integration catalog and tenant identity (identities, tenants, memberships).
+- **EF Core migrations** - Catalog and `TenantIdentity` migrations. Schema updates are intended to be controlled steps; app-startup migration (`Database:MigrateOnStartup`) is used only for non-production cloud environments.
 
 ## Infrastructure and Delivery Components
 
@@ -19,7 +21,12 @@
 - **GitHub Actions workflows** - Separate API and web CI jobs with formatting, tests, audits, API checks, and UI checks; a main-push workflow dispatches context-update review and does not deploy the application.
 - **Nginx** - Serves built web assets and forwards API/Swagger paths to the API container.
 
-No Terraform or cloud infrastructure package is present.
+- **Terraform roots (`infrastructure/state`, `bootstrap`, `shared`, `environment`)** - Non-production GCP infrastructure; see `architecture.md`.
+- **Lease controller (`infrastructure/shared/lease_controller`)** - Python Cloud Run function that starts/stops the shared database on a time-capped lease.
+- **Deploy workflows** - `deploy-preview.yml`, `deploy-staging.yml`, `deploy-infrastructure.yml`, `terraform-validate.yml`, and `.github/scripts/renew-lease.sh`.
+- **Dockerfile `cloud-run-runtime` target** - API image bundling the built web assets.
+
+No production infrastructure is present.
 
 ## Test Components
 
@@ -30,7 +37,7 @@ No Terraform or cloud infrastructure package is present.
 
 ## Planned Product Components Not Yet Implemented
 
-The specification and architecture describe identity/access, tenancy, tenant integration configuration, consumer API key management/authentication, tenant-scoped upstream credential storage, usage/metering, pricing/billing, and operator catalog administration. These are product objectives/open questions and are not components in the current code.
+The specification and architecture describe tenant isolation, tenant integration configuration, consumer API key management/authentication, tenant-scoped upstream credential storage, usage/metering, pricing/billing, and operator catalog administration. These are product objectives/open questions and are not components in the current code.
 
 ## Total Count
 

@@ -105,8 +105,9 @@ shared for the initial product.
 - Tenant resolution, database access enforcement, and safe row-level security
   context handling.
 - Detailed API response and error contracts.
-- Hosting provider, container runtime, DNS/IP requirements, and Terraform
-  state/secrets integration.
+- Production hosting provider, container runtime, DNS/IP requirements, and
+  Terraform state/secrets integration. (Non-production uses GCP Cloud Run;
+  see ADR 0002 implementation status.)
 - Recovery time and recovery point objectives, backup retention, and restore
   cadence.
 - Exact test-environment lifecycle and resource cleanup implementation.

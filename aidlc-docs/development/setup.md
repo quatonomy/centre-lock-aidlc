@@ -32,7 +32,9 @@ database credentials in `compose.yaml` are for local development only; never
 reuse them outside the local environment.
 
 Database migrations are applied as a controlled step, not on application
-startup. After starting the Compose PostgreSQL service, install the EF CLI if
+startup (the `Database:MigrateOnStartup` option exists only for non-production
+cloud environments). Both the catalog and identity contexts have migrations;
+`dotnet ef database update` needs `--context` for each. After starting the Compose PostgreSQL service, install the EF CLI if
 needed and apply the catalog migration:
 
 ```sh
@@ -70,8 +72,17 @@ catalog browser with each enabled integration's upstream URL, authentication
 scheme, allow-listed endpoints, and OpenAPI document link. Swagger UI at
 <http://localhost:8080/swagger> remains the interactive API documentation
 surface and includes the catalogued integration documents. These catalog
-read endpoints and the proxy are not available outside Development; tenant
-sign-in and tenant-scoped integration management are not implemented yet.
+read endpoints and the proxy are not available outside Development;
+tenant-scoped integration management is not implemented yet.
+
+Google sign-in is optional locally. Set `CENTRELOCK_GOOGLE_CLIENT_ID` and
+`CENTRELOCK_GOOGLE_CLIENT_SECRET` (and `CENTRELOCK_PLATFORM_OPERATOR_SUBJECT`
+to the Google `sub` of the first platform operator) in the environment before
+`docker compose up`. Without them, sign-in reports "not configured"; outside
+Development and Testing the API refuses to start without Google configuration.
+Only users with a tenant membership or a configured operator subject can sign
+in. Cloud deployment of non-production environments is described in the
+`infrastructure/*/README.md` files of the application repository.
 
 Stop the services with `docker compose down` (or `docker-compose down`). Add
 `--volumes` only when you intend to remove the local PostgreSQL data.

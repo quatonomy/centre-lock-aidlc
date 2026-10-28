@@ -5,6 +5,15 @@ The GitHub Actions workflow in
 current source of truth for automated checks. Update it when a change adds,
 removes, or changes a required build, test, dependency, or delivery step.
 
+Non-production deployment is handled by separate workflows
+(`deploy-preview.yml`, `deploy-staging.yml`, `deploy-infrastructure.yml`) and
+`terraform-validate.yml`, which validates every Terraform root under
+`infrastructure/`. Preview and staging deploys are disabled until the
+`LEASE_CONTROLLER_URL` repository variable is set, and any step that needs the
+shared database must first renew its lease with `.github/scripts/renew-lease.sh`.
+Preview deploys run only for same-repository PRs; fork PRs must never receive
+cloud credentials.
+
 ## Pull request checks
 
 - Run build, formatting/analyzer, unit, and relevant integration/API checks
