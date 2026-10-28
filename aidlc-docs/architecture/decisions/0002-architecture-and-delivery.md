@@ -68,6 +68,16 @@ review all pull requests, and the main branch must remain releasable.
   and recovery point objectives remain open until provider requirements and
   costs are understood.
 
+## Implementation status (non-normative)
+
+A non-production Google Cloud path has been implemented: Terraform roots
+(state, bootstrap, shared, environment), Cloud Run services, a shared Cloud
+SQL instance behind a time-limited lease, per-PR preview and staging deploy
+workflows, and Terraform validation in CI. This is not a recorded production
+hosting decision. Production hosting, immutable-artifact promotion through
+test/staging/production, controlled production migrations, and recovery
+objectives remain open; non-production applies migrations at startup.
+
 ## Rationale
 
 - A modular monolith supports clear ownership and future growth without

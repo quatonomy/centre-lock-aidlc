@@ -22,9 +22,9 @@
 - **PostgreSQL 18** - Local Compose database image.
 - **Docker / Docker Compose** - OCI-compatible image build and local API/UI/database execution.
 - **Nginx Alpine** - Serves the built UI and proxies `/api` and `/swagger`.
-- **Hosting provider** - Not selected.
-- **Terraform** - Accepted as the intended IaC source of truth, but no Terraform configuration is present.
-- **GitHub Actions** - CI workflow plus a main-push context-review dispatch workflow; no application deployment is configured.
+- **Google Cloud (non-production only)** - Cloud Run, Cloud SQL for PostgreSQL 16, Artifact Registry, Secret Manager, Cloud Scheduler, a Python Cloud Run function (lease controller), GCS Terraform state, and Workload Identity Federation for GitHub OIDC. The production hosting decision has not been recorded.
+- **Terraform 1.9.8** - IaC source of truth; Google provider `~> 6.0` in four roots under `infrastructure/`.
+- **GitHub Actions** - CI workflow, a main-push context-review dispatch workflow, non-production deploy workflows (preview, staging, shared infrastructure), and Terraform validation.
 
 ## Build Tools
 
@@ -47,4 +47,5 @@
 
 - **Star Wars API (`swapi.dev`)** - Seeded Development proxy integration; live tests are opt-in.
 - **GitHub** - A product candidate with no implementation or catalog definition; MVP inclusion and authorization are deferred pending use cases and permission scopes.
-- **Identity, billing, secret storage** - Not integrated.
+- **Google OIDC** - Sign-in provider; required outside Development/Testing.
+- **Billing, tenant-credential secret storage** - Not integrated.

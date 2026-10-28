@@ -20,15 +20,15 @@
 
 ## Technical Debt and Gaps Relative to Product Goals
 
-- Identity, authorization, tenancy resolution, tenant membership/roles, and tenant isolation are not implemented.
-- Tenant integration configuration and the management UI are not implemented; current UI is a Development catalog preview.
+- Google OIDC sign-in, tenant memberships with `Admin`/`Member` roles, and operator tenant provisioning exist, but role-based authorization differences, membership management/invitation, tenancy resolution for tenant-owned data, and tenant isolation (including row-level security) are not implemented.
+- Tenant integration configuration and the management UI are not implemented; the UI shows sign-in state and memberships plus a catalog preview, and members see the platform-wide enabled catalog.
 - Consumer API key creation, hashing, rotation, revocation, and authentication are not implemented.
 - Tenant-scoped upstream secret storage/retrieval is not implemented; only an interface and a deliberately unconfigured implementation exist.
 - GitHub is an initial integration goal but has no seeded catalog entry or connector setup.
 - Usage recording, metering, editable plans, billing, and operator catalog-management workflows are absent.
 - The generic connector's catalog persistence is present, but no authorized production catalog administration API exists.
-- The documented future delivery flow (Terraform, isolated PR deployments, and promotion across test/staging/production) is not present in the current tracked CI/infrastructure files.
-- Architecture prose says the UI is built/served with the application, while the current Compose deployment runs separate API and Nginx UI services.
+- Non-production delivery exists (Terraform on GCP, per-PR Cloud Run previews, staging deploy on merge). Still missing: promotion of one immutable artifact through test/staging/production, a production environment, API/feature checks against previews beyond a readiness smoke test, controlled (non-startup) production migrations, keeping the database password out of Terraform state, and tested restore/recovery. Preview and staging workflows are inert until `LEASE_CONTROLLER_URL` is set; this static review did not exercise them.
+- The cloud image serves the UI with the API, while Compose still runs separate API and Nginx UI services.
 - Several specification questions remain open, including tenant API error/timeout details, connector credential flows, GDPR retention/access, and production resiliency and change-management targets. The per-request amount is now £0.01 in future billing scope; usage and billing are deferred beyond the MVP.
 - Active GitHub issues add questions about DTO publication, auditability, DORA metrics, AI-assisted integration/test maintenance, AI guidance structure, CI coverage thresholds, monitoring/alerting, and hosting/deployment. They are captured as future context rather than accepted requirements in `github-issue-context.md`.
 

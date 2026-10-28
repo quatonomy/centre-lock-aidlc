@@ -2,7 +2,23 @@
 
 ## API Surface
 
-The currently implemented API is a small health route plus catalog/OpenAPI and proxy routes mapped only in the Development environment. Swagger UI is enabled by the API host. There are no tenant-management, sign-in, tenant-scoped integration, consumer-authentication, usage, or billing endpoints in the tracked implementation.
+The currently implemented API has health/readiness routes, sign-in and identity routes, an operator tenant-provisioning route, authenticated tenant catalog read routes, and catalog/OpenAPI and proxy routes mapped only in the Development environment. Swagger UI is enabled by the API host. There are no tenant-owned integration configuration, membership-management, consumer-authentication, usage, or billing endpoints in the tracked implementation.
+
+### API readiness
+- **Method**: `GET`
+- **Path**: `/api/ready`
+- **Purpose**: Readiness; checks connectivity of the catalog and identity database contexts.
+- **Response**: `200` with `{"status":"ready"}`, otherwise `503`.
+- **Environment**: All environments. Used as the deployed-environment smoke test.
+
+### Identity and tenant routes
+- `GET /api/auth/status` (anonymous): `{signInConfigured, provider}`.
+- `GET /api/auth/csrf` (anonymous): `{requestToken}` for the `X-CSRF-TOKEN` header.
+- `GET /api/auth/sign-in?returnUrl=`: starts Google OIDC; only local paths are honored; `503 sign_in_not_configured` when unconfigured. Callback is `/api/auth/callback`; failures redirect to `/?signIn=failed`.
+- `POST /api/auth/sign-out`: authenticated and CSRF-protected; `204`.
+- `GET /api/me`: authenticated profile with email, display name, `isPlatformOperator`, and memberships (tenant ID, name, slug, role); `401` when unauthenticated or unconfigured.
+- `POST /api/operator/tenants` `{name, slug}`: requires the platform-operator policy (subject in `PlatformOperators:SubjectIds`) and CSRF token; creates a tenant with the caller as `Admin`; `201`, `400 invalid_tenant_request`, or `409 tenant_slug_exists`. Mapped only when OIDC is configured.
+- `GET /api/tenant/integrations` and `GET /api/tenant/integrations/{slug}/openapi.json`: authenticated and require at least one tenant membership (`403` otherwise; `503` when sign-in is unconfigured). They return the platform-wide enabled catalog, not tenant-scoped data.
 
 ## REST APIs
 
