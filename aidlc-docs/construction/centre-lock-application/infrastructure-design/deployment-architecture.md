@@ -143,7 +143,7 @@ bucket, Workload Identity Federation, pipeline service accounts) is manual.
 - **CI, per same-repo pull request:** applies a per-PR Terraform root with
   state prefix `previews/pr-<n>` and deploys the image. Destroys it on PR
   close or expiry. It uses a separate least-privilege identity limited to
-  `pr-*` resources, with no IAM administration and no access to staging or
+  `previews/` state and Cloud Run in the non-production project (Cloud Run create cannot be scoped by service name), with no IAM administration and no access to staging or
   production state. Fork PRs receive no credentials.
 - **CD, `main`:** applies the staging root, then deploys the image. Shared
   infrastructure (Cloud SQL, lease controller, registry) is applied from
