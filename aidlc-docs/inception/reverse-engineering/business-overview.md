@@ -24,9 +24,9 @@ Text alternative: The platform operator manages integration definitions. A custo
 
 - **Business Description**: Provide a centrally managed platform for customers to configure and consume third-party integrations while isolating each customer tenancy.
 - **Business Transactions in the current implementation**:
-  - On API startup, add the Star Wars API definition to PostgreSQL if its slug is absent. The seed runs in all environments; catalog and development proxy routes are only mapped in Development.
-  - In Development, list enabled catalog integrations and retrieve their stored OpenAPI documents.
-  - In Development, submit a proxy request for an enabled integration that requires no upstream credentials. The proxy enforces the catalog's method/path allow list and wraps the upstream status and response body in a `connector` response object.
+  - On API startup, add the Star Wars API definition to PostgreSQL if its slug is absent. The seed runs in all environments; catalog and OpenAPI routes are public in every environment; the development proxy is mapped only in Development or when `Integrations:EnableProxy` is enabled.
+  - In any environment, list enabled catalog integrations and retrieve their stored OpenAPI documents without authentication.
+  - In Development (or with the proxy flag), submit a proxy request for an enabled integration that requires no upstream credentials. The proxy enforces the catalog's method/path allow list and wraps the upstream status and response body in a `connector` response object.
   - Check API liveness using `GET /api/health`.
 - **Product transactions described by the specification but not implemented yet**:
   - Authenticate a tenant user and enforce membership, role, and tenant isolation.
@@ -45,7 +45,7 @@ Text alternative: The platform operator manages integration definitions. A custo
 ## Component-Level Business Descriptions
 
 ### ASP.NET Core API
-- **Purpose**: Serves health, Development catalog/OpenAPI, and Development proxy routes.
+- **Purpose**: Serves health, public catalog/OpenAPI, and flag-gated Development proxy routes.
 - **Responsibilities**: Seed the catalog, compose catalog/proxy services, map the current API surface, and expose Swagger.
 
 ### Integration catalog

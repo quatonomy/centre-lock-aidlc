@@ -2,7 +2,7 @@
 
 ## API Surface
 
-The currently implemented API is a small health route plus catalog/OpenAPI and proxy routes mapped only in the Development environment. Swagger UI is enabled by the API host. There are no tenant-management, sign-in, tenant-scoped integration, consumer-authentication, usage, or billing endpoints in the tracked implementation.
+The currently implemented API is a health route, public read-only catalog/OpenAPI routes mapped in every environment, and an unauthenticated proxy route mapped only in Development or when `Integrations:EnableProxy` is true. Experimental identity/tenant-catalog routes exist in code, but all authentication is outside the current MVP scope. Swagger UI is enabled by the API host. There are no tenant-management, sign-in, tenant-scoped integration, consumer-authentication, usage, or billing endpoints in the tracked implementation.
 
 ## REST APIs
 
@@ -14,21 +14,21 @@ The currently implemented API is a small health route plus catalog/OpenAPI and p
 - **Response**: `200` with `{"status":"ok"}`.
 - **Environment**: All environments.
 
-### List Development catalog entries
+### List public catalog entries
 - **Method**: `GET`
 - **Path**: `/api/integrations`
-- **Purpose**: List enabled integrations for the Development catalog preview.
+- **Purpose**: Public, read-only list of enabled integrations.
 - **Request**: None.
 - **Response**: `200` array with `slug`, `name`, `baseUrl`, `authenticationScheme`, `endpoints` (`method`, `pathTemplate`), and `openApiUrl`.
-- **Environment**: Development only. Not a tenant-facing catalog API.
+- **Environment**: All environments; no authentication. Not a tenant-specific catalog API.
 
-### Get a Development integration OpenAPI document
+### Get a public integration OpenAPI document
 - **Method**: `GET`
 - **Path**: `/api/integrations/{slug}/openapi.json`
 - **Purpose**: Return the stored OpenAPI document for an enabled definition.
 - **Request**: URL slug.
 - **Response**: `200 application/json` with the stored document; `404` with an error for an unavailable integration.
-- **Environment**: Development only.
+- **Environment**: All environments; no authentication.
 
 ### Development proxy
 - **Method**: `POST`
@@ -42,13 +42,13 @@ The currently implemented API is a small health route plus catalog/OpenAPI and p
   - `404` when the integration is unavailable.
   - `502` when an upstream transport request fails.
   - `504` with an explicit timeout error when the upstream request times out.
-- **Environment**: Development only. The endpoint passes an empty tenant ID placeholder and does not support credentialed integrations.
+- **Environment**: Development, or any environment where `Integrations:EnableProxy` is true (used for non-production preview/staging API tests). The endpoint passes an empty tenant ID placeholder and does not support credentialed integrations.
 - **Timeout/retry**: Named HTTP client timeout is 30 seconds. No retry policy is configured.
 
 ## API Documentation Surface
 
 - **Swagger UI**: `/swagger`.
-- **OpenAPI**: ASP.NET Core API document plus Development catalog documents registered with Swagger UI.
+- **OpenAPI**: ASP.NET Core API document plus catalog documents registered with Swagger UI.
 - **API contract tests**: Bruno collection under `tests/api/centre-lock/`, with default non-live tests and explicitly tagged live Star Wars calls.
 
 ## Internal APIs
