@@ -27,7 +27,7 @@
 - GitHub is an initial integration goal but has no seeded catalog entry or connector setup.
 - Usage recording, metering, editable plans, billing, and operator catalog-management workflows are absent.
 - The generic connector's catalog persistence is present, but no authorized production catalog administration API exists.
-- The documented future delivery flow (Terraform, isolated PR deployments, and promotion across test/staging/production) is not present in the current tracked CI/infrastructure files.
+- Non-production Terraform, PR preview, and staging deployment exist; production, automated verification between environments, and the full test/staging/production promotion flow are not present.
 - Architecture prose says the UI is built/served with the application, while the current Compose deployment runs separate API and Nginx UI services.
 - Several specification questions remain open, including tenant API error/timeout details, connector credential flows, GDPR retention/access, and production resiliency and change-management targets. The per-request amount is now £0.01 in future billing scope; usage and billing are deferred beyond the MVP.
 - Active GitHub issues add questions about DTO publication, auditability, DORA metrics, AI-assisted integration/test maintenance, AI guidance structure, CI coverage thresholds, monitoring/alerting, and hosting/deployment. They are captured as future context rather than accepted requirements in `github-issue-context.md`.

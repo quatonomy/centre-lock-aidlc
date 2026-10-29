@@ -103,15 +103,17 @@ Text alternative: The Development-only endpoint resolves an enabled catalog entr
 
 - **External APIs**: `https://swapi.dev/api/` is the seeded Star Wars API used by the Development proxy. GitHub is a product candidate, but MVP inclusion and authorization are deferred; no GitHub catalog entry or provider-specific behavior exists in the tracked implementation.
 - **Database**: PostgreSQL via EF Core/Npgsql, with an initial integration-catalog migration.
-- **Third-party services**: No identity provider, billing provider, or secret manager is integrated.
+- **Third-party services**: No billing provider or application secret manager is integrated. Experimental Google OIDC/identity code exists but is outside current MVP scope; non-production deployments may run without it via `Authentication:AllowUnconfigured`, while production stays fail-closed.
 
 ## Infrastructure Components
 
 - **Containers**: Dockerfile builds a .NET API runtime and a separate Nginx web runtime from a shared build context.
 - **Local deployment**: Compose defines API, UI, and PostgreSQL services. The web Nginx configuration proxies `/api` and `/swagger` to the API service.
 - **CI**: `.github/workflows/ci.yml` runs .NET formatting and tests, PostgreSQL-backed tests, Compose/Bruno checks, and separate web lint/build/Playwright checks with npm audits.
-- **Context-review dispatch**: `.github/workflows/cd.yml` dispatches `context-update-review.yml` on pushes to `main`, passing the source commit SHA; it does not deploy the application.
-- **Not present**: No Terraform files, cloud resources, hosting-provider configuration, PR deployment environments, or production promotion workflow are tracked.
+- **Context-review dispatch**: `.github/workflows/cd.yml` dispatches `context-update-review.yml` on pushes to `main`, passing the source commit SHA.
+- **Non-production GCP delivery (implemented)**: Terraform roots under `infrastructure/` (`state`, `bootstrap`, `shared`, `environment`) target a non-production GCP project: Artifact Registry, Cloud Run, a shared Cloud SQL PostgreSQL 16 instance, Workload Identity Federation with separate preview, staging, and infrastructure-applier identities, and a lease-controller function that starts the database on demand (lease capped at 60 minutes) and stops it after expiry. Pipelines call `.github/scripts/renew-lease.sh` before database use; it fails on a non-200 renew response. Configuration uses `GCP_NON_PROD_*` repository variables; preview and staging deployments stay disabled until `GCP_NON_PROD_LEASE_CONTROLLER_URL` is set.
+- **Workflows**: Reusable (`workflow_call`) deploy workflows. CI on pull requests runs API and web container tests, then Terraform validation, then a per-PR preview deployment followed by non-live Bruno API tests (`test:deployed`) against the preview. CD on `main` deploys shared infrastructure only when `infrastructure/shared/**` or its workflow changes (approval-gated `shared-infrastructure` environment) and deploys staging.
+- **Not present**: No production environment or production promotion workflow, no automated verification between environments, and no preview-teardown workflow (the former `destroy-preview.yml` was removed). Production hosting remains undecided.
 - **Networking**: Local ports are API `8080`, UI `5173`, and PostgreSQL `5432`. These are development settings, not production deployment requirements.
 
 ## Architecture Boundaries and Gaps

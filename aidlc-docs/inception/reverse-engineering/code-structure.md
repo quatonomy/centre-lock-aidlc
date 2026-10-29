@@ -7,7 +7,7 @@
 - **API tests**: `tests/CentreLock.Api.Tests/` is a .NET test project in the solution.
 - **API contract tests**: `tests/api/` has an independent npm package and Bruno collection.
 - **Local infrastructure**: Docker Compose builds/runs the API and web image targets with PostgreSQL.
-- **CI and automation**: GitHub Actions workflow `.github/workflows/ci.yml` runs checks; `.github/workflows/cd.yml` dispatches `context-update-review.yml` with the source commit SHA on pushes to `main`. It does not deploy the application.
+- **CI and automation**: GitHub Actions workflow `.github/workflows/ci.yml` runs checks on pull requests, then calls reusable Terraform-validation and preview-deployment workflows; on pushes to `main`, `.github/workflows/cd.yml` dispatches `context-update-review.yml` with the source commit SHA and runs independent (no `needs`) jobs for path-filtered shared-infrastructure deployment and staging deployment. Terraform roots are in `infrastructure/` (`state`, `bootstrap`, `shared`, `environment`).
 
 ## Key Modules
 
@@ -21,7 +21,7 @@
 - `Integrations/Catalog/IntegrationCatalogDbContext.cs` - EF Core mappings for catalog and owned allow-list rows.
 - `Integrations/Catalog/EfIntegrationCatalog.cs` and `IIntegrationCatalog.cs` - persistence/query implementation and interface.
 - `Integrations/Catalog/IntegrationCatalogSeed.cs` - Star Wars definition, OpenAPI document, and 12 GET method/path combinations.
-- `Integrations/Catalog/DevelopmentIntegrationCatalogEndpoints.cs` - Development-only catalog-list and OpenAPI routes.
+- `Integrations/Catalog/PublicIntegrationCatalogEndpoints.cs` - public read-only catalog-list and OpenAPI routes (`MapPublicIntegrationCatalogEndpoints`; the containing static class is still named `DevelopmentIntegrationCatalogEndpoints`).
 - `Integrations/Catalog/Migrations/` - initial schema migration, generated designer, and model snapshot.
 
 ### Proxy
@@ -47,7 +47,7 @@
 ### Delivery files
 - `Dockerfile`, `compose.yaml` - local multi-container build and services.
 - `.github/workflows/ci.yml` - PR and main-branch checks.
-- `.github/workflows/cd.yml` - Main-branch push dispatch for context-update review; not application deployment.
+- `.github/workflows/cd.yml` - Main-branch push: context-update review dispatch, path-filtered shared-infrastructure deployment, and staging deployment (non-production).
 - `aidlc-docs/development/setup.md` - local setup, migrations, API/UI use, tests, and current Development-only feature limits (moved from the application folder during context consolidation).
 
 ## Existing File Inventory

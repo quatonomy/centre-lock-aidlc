@@ -16,10 +16,10 @@
 
 - **Dockerfile** - Multi-stage web and API image builds.
 - **Docker Compose** - Local API, Nginx UI, and PostgreSQL services.
-- **GitHub Actions workflows** - Separate API and web CI jobs with formatting, tests, audits, API checks, and UI checks; a main-push workflow dispatches context-update review and does not deploy the application.
+- **GitHub Actions workflows** - Separate API and web CI jobs with formatting, tests, audits, API checks, and UI checks; a main-push workflow dispatches context-update review and deploys shared infrastructure (when changed) and staging to non-production GCP; PRs also get a preview deployment.
 - **Nginx** - Serves built web assets and forwards API/Swagger paths to the API container.
 
-No Terraform or cloud infrastructure package is present.
+Terraform roots for non-production GCP infrastructure are present under `infrastructure/`; no production infrastructure exists.
 
 ## Test Components
 

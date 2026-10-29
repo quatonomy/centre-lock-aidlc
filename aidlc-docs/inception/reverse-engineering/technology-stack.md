@@ -22,9 +22,9 @@
 - **PostgreSQL 18** - Local Compose database image.
 - **Docker / Docker Compose** - OCI-compatible image build and local API/UI/database execution.
 - **Nginx Alpine** - Serves the built UI and proxies `/api` and `/swagger`.
-- **Hosting provider** - Not selected.
-- **Terraform** - Accepted as the intended IaC source of truth, but no Terraform configuration is present.
-- **GitHub Actions** - CI workflow plus a main-push context-review dispatch workflow; no application deployment is configured.
+- **Hosting provider** - Non-production uses GCP (Cloud Run, Artifact Registry, Cloud SQL PostgreSQL 16, Workload Identity Federation). No production provider decision is recorded.
+- **Terraform** - Accepted IaC source of truth; non-production roots (Terraform 1.9.8, GCS state) are implemented under `infrastructure/`.
+- **GitHub Actions** - CI, per-PR preview deployment, main-push context-review dispatch, and shared-infrastructure/staging deployment to non-production.
 
 ## Build Tools
 
