@@ -13,22 +13,32 @@ is `centre-lock/SPEC.md`.
 
 ## MVP scope
 
-The MVP includes tenant sign-in and membership/roles, tenant integration
-configuration, and the consumer proxy. Usage views, pricing, billing, and
-payment collection are deferred. GitHub inclusion is also deferred until its
-use cases and permission scopes are defined. The current implementation does
-not yet include these MVP capabilities.
+**Current scope amendment (2026-10-26):** All authentication and sign-in are
+deferred, including management OIDC sessions and consumer API keys. Membership,
+roles, invitations, tenant configuration, protected catalog administration,
+consumer-key management, and authenticated proxy calls are out of the MVP.
+Current in-scope capabilities are public read-only discovery of the
+platform-published integration catalog and tenant routing based on bespoke
+tenant subdomains beneath a configured shared platform base domain. A
+subdomain is a routing label only; it does not authenticate callers or grant
+access to tenant-private data or upstream integrations. This amendment
+supersedes the earlier scope answers below wherever they include
+authentication-dependent functionality.
+
+Usage views, pricing, billing, and payment collection remain deferred.
+GitHub inclusion is deferred until its use cases and permission scopes are
+defined.
 
 ## Users and use cases
 
 - **Organization and tenancy:** A tenancy represents one customer organization. The organization is the isolation boundary: a tenancy must not be able to see or access another tenancy's data or resources.
-- **Tenant users:** Tenant admins invite users and assign admin or view-only user roles. Roles must be extendable. Usage views and plans are deferred beyond the MVP; later product direction allows all tenant users to view usage, while only admins view plan and charge details.
-- **Platform-managed integrations:** The platform operator manages the central catalog of integrations and their endpoint allow lists. A tenant can view the integrations available to it and select from that list; it cannot create catalog entries or change allow lists.
-- **Tenant integration management:** Through the UI, a tenant can add, remove, and modify its configured integrations, and view their OpenAPI documentation. Tenants may modify credentials and tenant-local display or operational settings, but not catalog definitions or endpoint allow lists.
-- **API consumers:** A tenant's consumers access its configured integrations through a tenant-specific subdomain, for example `https://valuedCustomer.example.com/registeredintegration/api/health`. Tenant subdomains are in scope for the MVP; custom domains are deferred. Both subdomain and tenant-scoped API key must identify the same tenant.
-- **Proxy API:** For every completed upstream response, the tenant-facing API returns platform HTTP 200. The response body contains a `connector` object holding the integration response, including the upstream status code and response body. Platform-side failure mapping remains unresolved.
+- **Tenant users (deferred):** Tenant admins may later invite users and assign admin or view-only roles. Invitation expiry, redemption, and membership enforcement are future scope; no identity or sign-in mechanism is in the current MVP.
+- **Platform-managed integrations:** The platform's current catalog is published/read-only to public callers and includes OpenAPI documents. Catalog edits, allow-list changes, and publication administration are deferred until an authorized operator workflow is in scope.
+- **Tenant integration management (deferred):** Tenant users may later add, remove, and modify tenant-local integration settings. Do not expose tenant-specific configuration or credentials in the current unauthenticated MVP.
+- **Tenant routing:** A tenant's bespoke subdomain beneath a configured platform base domain (for example, `https://valuedCustomer.example.com/`) selects the tenant-routing context. Custom domains are deferred. Subdomains do not authenticate callers or authorize access.
+- **Proxy API (deferred):** Future authenticated proxy behavior returns platform HTTP 200 for completed upstream responses and maps failures as specified below. Do not make tenant-facing upstream proxy calls in the current MVP because all authentication is out of scope.
 - **Usage and billing:** Deferred beyond the MVP. Later product direction is to bill all requests, including unsuccessful and timed-out requests, at £0.01 per request in addition to the monthly plan. Plan changes must specify an effective date and affected tenancies. Payment collection and invoicing are not in the MVP.
-- **Authentication and authorization:** Management UI sign-in uses OIDC. Google is required for initial personal testing; platform operators may configure additional providers later. Tenant admins invite users and assign admin or view-only user roles. The role model must be extendable.
+- **Authentication and authorization (deferred):** The earlier design selected management OIDC sign-in (Google initially), tenant memberships, and roles. None is in the current MVP; consumer API-key authentication is also deferred. Do not treat subdomain routing as a security boundary.
 
 ## Pricing
 
@@ -66,9 +76,12 @@ The exact authentication and credential setup for each connector remain integrat
 - Each integration has associated OpenAPI documentation.
 - For every completed upstream response, the tenant-facing platform returns HTTP 200 and includes the upstream status code and body in its response body.
 - Upstream errors are returned in the platform response body.
+- Do not forward upstream response headers. Parse a valid JSON response body as JSON; otherwise return it as text. Reject or otherwise safely handle upstream response bodies larger than 0.5 MB.
 - Upstream requests time out after 30 seconds. The response must indicate
-  that a timeout occurred; platform-side error mapping and timeout-body
-  details remain to be defined.
+  that a timeout occurred. Platform-side failures use 400 for invalid
+  requests, 401 for missing or invalid API keys, 403 for unauthorized
+  requests, 502 for upstream transport failures, and 504 for timeouts, with
+  a JSON platform error object.
 - The response body has a top-level `connector` object containing the integration response, including its status code and body. The platform's own status code is returned as the HTTP status code.
 - For local development only, expose `POST /api/integrations/proxy` with a JSON body containing the integration slug, HTTP method, path, optional query string, and optional JSON body. This unauthenticated route is available only in the Development environment, only invokes enabled catalog integrations configured with no upstream credentials, and enforces the catalog endpoint allow-list. It is not the tenant-facing proxy API.
 - Seed the Star Wars API definition idempotently into the catalog in every environment. This does not make catalog-read, OpenAPI, or unauthenticated proxy routes available outside Development.
@@ -89,43 +102,50 @@ The platform provides a centrally managed connector for each supported third-par
 
 ### Consumer API credentials
 
-Consumers authenticate to the platform using API keys scoped to a user within a tenant. Store only a one-way hash of each key, not the usable secret; show the key to the customer only when it is created. Keys are created through the UI and must be revocable and replaceable. Keys must be rotated every 12 months; the rotation interval must be configurable so it can be changed later.
+**Deferred:** Consumers will eventually authenticate to the platform using API keys scoped to a user within a tenant. The key lifecycle, hashing, display, revocation, and rotation requirements apply only after consumer authentication is brought back into scope.
 
 ## Operations and data
 
 - The platform does not retry upstream requests; retry behavior belongs to the customer workflow.
-- Log one record per API request, recording whether it succeeded or failed. Keep logged data to a minimum and do not log credentials or API keys. GDPR-related retention, access, and data-use requirements remain to be specified.
+- Log one minimal usage record per API request, recording whether it succeeded or failed; do not log credentials or API keys. Keep these records separate from security/application logs. Retain security/application logs for at least 90 days. Approve GDPR-compliant retention and access rules before production.
+- No availability SLA applies during MVP; the service may be turned off when idle. Before production customer traffic, establish a 99.95% monthly availability target.
+- Production recovery direction is Warm Standby with single-region, multi-zone deployment. Exact maximum RTO/RPO values are deferred during MVP and must be approved before production customer traffic.
+- Production deployments use canary rollout with progressive traffic shift. On failure, redeploy the previous version-pinned infrastructure and application artifact.
+- Use a lightweight production change record, approval, and rollback-note process visible in GitHub. Human operators handle production incidents; incident-response documentation is maintained outside GitHub for now.
 
 ## Constraints and decisions
 
  - A tenant cannot see or access another tenant's data or resources.
  - The platform operator manages the central integration catalog and endpoint allow lists, not tenants.
- - Tenant API calls are proxied to upstream integrations.
- - Tenant API subdomains and tenant-scoped API keys must identify the same tenant.
+ - **Future scope:** Authenticated tenant API calls are proxied to upstream integrations.
+ - **Future scope:** Tenant API subdomains and tenant-scoped API keys must identify the same tenant.
  - The platform returns HTTP 200 for completed upstream responses; the upstream status code is included in the response body.
  - Pricing tiers and thresholds must be editable.
  - Per-request API charges are additional to the monthly plan price.
  - Upstream credentials are tenant-specific secrets and are not exposed through the UI or API.
  - The platform operator provides and manages connectors for supported third-party services; each tenant configures its own account credentials for a connector.
- - Consumer API keys are tenant-scoped; only one-way hashes are stored.
+ - **Deferred:** Consumer API keys are tenant-scoped; only one-way hashes are stored.
  - The platform does not retry upstream requests.
- - Management UI authentication uses SSO/federated identity with OpenID Connect; Google sign-in is required for initial personal testing.
- - Initial tenant roles are admin (can edit) and user (view-only); the role model must be extendable.
- - Tenant subdomains are used for the MVP; custom domains are deferred.
+ - **Deferred:** Management UI authentication uses SSO/federated identity with OpenID Connect; Google was the initial provider candidate.
+ - **Deferred:** Initial tenant roles are admin (can edit) and user (view-only); the role model must be extendable.
+ - Tenant-specific subdomains beneath a shared configured platform base domain are used for routing in the MVP; custom domains are deferred. A subdomain is not an access control.
  - Star Wars API is the seeded trial integration; GitHub inclusion and authorization are deferred until its use cases and scopes are defined.
  - The proxy timeout is 30 seconds and must be indicated in the response.
  - The response body contains a `connector` object with the integration response; the platform status is the HTTP status and the upstream status is in the body.
+ - Platform-side proxy failures use 400 (invalid request), 401 (missing/invalid API key), 403 (unauthorized), 502 (upstream transport failure), and 504 (timeout), with a JSON platform error object.
  - Future product direction bills all API requests at £0.01 each; usage and billing are deferred beyond the MVP.
- - Consumer API keys are created through the UI, scoped per user per tenant, and rotated every 12 months using a configurable interval.
- - Log one minimal success/error record per request; approve GDPR-compliant retention/access rules before production.
+ - **Deferred:** Consumer API keys are created through the UI, scoped per user per tenant, and rotated every 12 months using a configurable interval.
+ - Keep minimal request usage records separate from security/application logs; retain security/application logs for at least 90 days and approve GDPR-compliant retention/access rules before production.
+ - No MVP availability SLA; permit the service to be turned off when idle. Approve a 99.95% monthly availability target and exact Warm Standby RTO/RPO values before production customer traffic.
+ - Use canary deployment, previous-version rollback, and a GitHub-visible change record for production. Incident response is human-managed and documented outside GitHub for now.
 
 ## Open questions
 
 - **Integration credentials:** What authorization flow and credential types should a future GitHub connector use?
 - **Catalog administration:** Which platform-operator role and UI/API workflow may create, update, disable, and publish catalog definitions?
 - **Tenant credentials:** Which hosting-provider secret manager will encrypt and retrieve tenant-specific API keys and bearer tokens?
-- **API contract:** What are the exact response property names and representations for upstream headers, errors, and platform errors? What HTTP status code and body represent a timeout? What response size limit applies?
+- **API contract:** What are the exact response property names for the platform error object? (The status mapping and JSON error-object form are defined; the exact schema remains unspecified.)
 - **Pricing and metering:** How should deferred usage, charges, and invoices be presented?
-- **Operations:** What availability, RTO/RPO, regional topology, change-management, rollback, deployment, and incident-response targets/processes apply before production?
-- **Data and logs:** What GDPR-compliant retention, access, and permitted-use rules must be approved before production?
+- **Operations:** Approve exact Warm Standby RTO/RPO values and the 99.95% monthly availability target before production customer traffic. Define the human-managed incident-response documentation outside GitHub.
+- **Data and logs:** Approve GDPR-compliant retention and access rules for minimal usage records and security/application logs before production.
 - **Product positioning:** What is the platform's unique selling proposition compared with alternatives?

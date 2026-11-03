@@ -1,5 +1,17 @@
 # Architecture overview
 
+## Current scope amendment (2026-10-26)
+
+All authentication and sign-in, including OIDC management sessions and
+consumer API keys, are deferred. Current in-scope work is public read-only
+catalog discovery and tenant routing from bespoke subdomains under a shared,
+configured platform base domain. A subdomain selects a routing context only;
+it is not identity, authorization, or permission to access tenant data or
+invoke upstream services. Tenant management, private data, catalog writes,
+and proxy execution remain unavailable until their authorization scope is
+approved. This amendment supersedes authentication-dependent MVP statements
+below; those describe possible future architecture.
+
 ## System shape
 
 centre-lock is a .NET modular monolith: one ASP.NET Core application contains
@@ -23,18 +35,19 @@ These are logical boundaries within the monolith, not independently deployed
 services. Refine their interfaces as requirements become concrete while
 preserving the rules below.
 
-- **Identity and access:** Federated sign-in, tenant membership, roles, and
-  server-side authorization.
-- **Tenancy:** Organizations, tenant context, and tenant-owned settings.
+- **Identity and access (deferred):** Federated sign-in, tenant membership,
+  roles, and server-side authorization.
+- **Tenancy:** Organizations and host-based tenant routing. Routing does not
+  authorize access to tenant-owned settings.
 - **Integration catalog:** Platform-managed integration definitions, endpoint
   allow lists, OpenAPI documentation, and declarative authentication settings,
   stored as PostgreSQL data.
 - **Connectors:** A generic HTTP connector applies catalog definitions at
   runtime. Provider-specific code is reserved for protocols that cannot be
   safely expressed through the supported declarative settings.
-- **Proxy:** Consumer authentication, tenant resolution, allow-list
-  enforcement, request forwarding, timeout handling, response mapping, and
-  usage recording.
+- **Proxy (deferred):** Future consumer authentication, tenant resolution,
+  allow-list enforcement, request forwarding, timeout handling, response
+  mapping, and usage recording.
 - **Usage and billing:** Tenant-scoped usage records and data-driven plan and
   per-request pricing.
 - **Application interfaces:** Management API and UI. Interfaces call module
@@ -48,10 +61,10 @@ shared for the initial product.
 ## Boundaries and rules
 
 - **Tenant isolation is mandatory.** A tenancy is one customer organization.
-  Resolve tenant context from authenticated identity and trusted routing
-  information at the application boundary; never treat a caller-supplied
-  tenant ID as proof of access. Every operation on tenant-owned data must
-  enforce tenant scope.
+  Resolve a routing context from the configured tenant subdomain; never
+  treat that subdomain alone as proof of identity or access. Do not expose
+  tenant-private resources until authentication and authorization are
+  implemented.
 - **Enforce tenant scope in the application and database.** Use shared
   PostgreSQL tables with explicit tenant-scoped data access. Use PostgreSQL
   row-level security as defense in depth where it can be applied safely with
@@ -102,8 +115,8 @@ shared for the initial product.
 ## To define during implementation
 
 - Concrete module interfaces and dependency direction.
-- Tenant resolution, database access enforcement, and safe row-level security
-  context handling.
+- Tenant subdomain/base-domain provisioning, reserved hostnames, wildcard DNS
+  and TLS, database access enforcement, and safe row-level security context.
 - Detailed API response and error contracts.
 - Hosting provider, container runtime, DNS/IP requirements, and Terraform
   state/secrets integration.

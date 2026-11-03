@@ -38,7 +38,8 @@ needed and apply the catalog migration:
 ```sh
 dotnet tool install --global dotnet-ef --version 10.0.0
 ConnectionStrings__CentreLock='Host=localhost;Port=5432;Database=centre_lock;Username=centre_lock;Password=local-development-only' \
-  dotnet ef database update --project src/CentreLock.Api
+  dotnet ef database update --project src/CentreLock.Api \
+    --context IntegrationCatalogDbContext
 ```
 
 Then launch the API and UI; startup idempotently adds the Star Wars API
@@ -49,10 +50,15 @@ docker compose up --build
 ```
 
 The Star Wars API catalog definition is seeded in every environment as a
-trial integration. Catalog browsing, OpenAPI document routes, and the
-unauthenticated proxy remain Development-only until tenant authentication and
-authorization are implemented. In Development, request a Star Wars person
-through centre-lock:
+trial integration. The current catalog browser and OpenAPI routes are
+Development-only. The local unauthenticated proxy is a Development-only test
+route for enabled integrations that require no upstream credentials; it is
+not a tenant-facing proxy API. Authentication and sign-in of every kind,
+including OIDC sessions and consumer API keys, are out of scope. Do not
+configure Google OAuth credentials or use the existing identity scaffolding
+as a current MVP feature. Tenant-specific subdomain routing and public
+catalog discovery outside Development are planned but not implemented yet.
+In Development, request a Star Wars person through the test proxy:
 
 ```sh
 curl --fail-with-body http://localhost:8080/api/integrations/proxy \
@@ -61,17 +67,18 @@ curl --fail-with-body http://localhost:8080/api/integrations/proxy \
 ```
 
 The platform responds with a `connector` object containing the upstream HTTP
-status and parsed JSON response body. The route is not mapped outside
-Development and refuses integrations that require credentials; it is not the
-authenticated tenant proxy API.
+status and parsed JSON response body. The route refuses integrations that require credentials and is not a
+tenant-facing proxy API.
 
 The web app at <http://localhost:5173/> includes a Development-only integration
 catalog browser with each enabled integration's upstream URL, authentication
 scheme, allow-listed endpoints, and OpenAPI document link. Swagger UI at
 <http://localhost:8080/swagger> remains the interactive API documentation
-surface and includes the catalogued integration documents. These catalog
-read endpoints and the proxy are not available outside Development; tenant
-sign-in and tenant-scoped integration management are not implemented yet.
+surface and includes the catalogued integration documents. Tenant invitations,
+membership, management authentication, subdomain routing, public catalog
+discovery, tenant configuration, consumer API keys, and the tenant-facing
+proxy are either deferred or not yet implemented according to the current
+scope amendment.
 
 Stop the services with `docker compose down` (or `docker-compose down`). Add
 `--volumes` only when you intend to remove the local PostgreSQL data.

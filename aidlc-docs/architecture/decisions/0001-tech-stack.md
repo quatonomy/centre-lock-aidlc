@@ -1,6 +1,6 @@
 # ADR 0001: Initial technology stack
 
-- **Status:** Accepted
+- **Status:** Accepted (authentication scope superseded for current MVP)
 - **Date:** 2026-09-30
 
 ## Context
@@ -21,9 +21,11 @@ Build the initial product as a **.NET modular monolith**:
   application rather than deployed as a separate service initially.
 - **Database:** PostgreSQL, accessed from .NET using Entity Framework Core and
   the Npgsql provider.
-- **Authentication:** Use OpenID Connect-based federated sign-in for the
-  management UI. Google is the first provider for personal testing; keep the
-  design open to additional identity providers.
+- **Authentication (deferred):** OpenID Connect/Google was considered for
+  management sign-in, but all authentication and sign-in are outside the
+  current MVP. Do not require or configure identity-provider credentials for
+  current MVP operation. Revisit this choice when authentication returns to
+  scope.
 - **Packaging:** Build OCI-compatible container images using Docker. Use
   Docker Compose for local development and select a compatible hosting
   container runtime later. Kubernetes is not required for the initial

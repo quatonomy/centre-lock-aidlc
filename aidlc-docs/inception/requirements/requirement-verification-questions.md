@@ -1,5 +1,14 @@
 # Requirements Verification Questions
 
+## Scope status
+
+This file records historical clarification choices. The 2026-10-26 scope
+amendment defers all authentication and sign-in, including OIDC and consumer
+API keys, and narrows current work to public catalog discovery and bespoke
+tenant-subdomain routing. The active scope is in `requirements.md` and
+`product-requirements.md`; do not treat earlier authentication-related
+answers here as current MVP scope.
+
 Reverse engineering is approved. The existing product requirements and accepted
 architecture decisions are treated as the baseline; these questions address
 material gaps before requirements are consolidated. Open GitHub issues remain

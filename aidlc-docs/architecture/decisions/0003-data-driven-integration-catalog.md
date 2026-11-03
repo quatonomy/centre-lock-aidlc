@@ -1,5 +1,13 @@
 # ADR 0003: Data-driven integration catalog
 
+## Current MVP scope amendment (2026-10-26)
+
+All authentication and sign-in are deferred. Public catalog read access is
+in scope, but catalog mutation, tenant-specific configuration, and proxy
+execution remain unavailable until authorization is approved and implemented.
+The original decision below remains applicable to the future catalog and
+proxy architecture.
+
 - **Status:** Accepted
 - **Date:** 2026-10-07
 

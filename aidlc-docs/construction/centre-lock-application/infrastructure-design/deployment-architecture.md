@@ -191,3 +191,10 @@ bucket, Workload Identity Federation, pipeline service accounts) is manual.
   in-region Warm Standby. No cross-region failover is provided.
 - Before production, approve availability and RTO/RPO targets, GDPR retention
   and access policy, scale limits, and restore/failover acceptance criteria.
+
+## Closure note (2026-11-03)
+The project was abandoned. What was built matches the "Automation model" above for non-production only: `bootstrap` (manual, once), `shared` (CD from `main`), and `environment` (previews from CI, staging from CD). Production was never built. Decisions made after this design was approved:
+- Catalog routes are public in every environment (no auth yet; impact judged minimal pre-MVP). The proxy is Development-only unless `Integrations:EnableProxy=true`, which preview and staging set.
+- Preview and staging run the full Bruno API suite after deploy; production would run only the `stability`-tagged subset.
+- The lease controller returns the Cloud SQL operation from `/renew`, and callers wait on `/status?operation=` because a stopped instance still reports `RUNNABLE`.
+- Preview and staging identities hold project-wide `run.admin` (everything in this project is non-production).

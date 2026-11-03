@@ -1,14 +1,25 @@
 # Requirements Clarification Questions
 
-Thank you. I recorded your answers and enabled the Security Baseline,
-Resiliency Baseline, and Property-Based Testing extensions. The following
-details remain open and are needed before the requirements can be finalized.
-Accepted decisions remain in force; in particular, GitHub Actions and
-Terraform remain the delivery standards, and tenant isolation and GDPR
-compliance are constraints.
+## Scope status
 
-Fill in each `[Answer]:` tag. Include requested detail after your selected
-letter, or choose the final "Other" option and describe your preference.
+The recorded answers below capture the original requirements baseline.
+**Scope amendment (2026-10-26):** All authentication and sign-in are
+deferred, including management OIDC and consumer API keys. The current MVP
+is public read-only catalog discovery and tenant routing from bespoke
+subdomains beneath a configured shared platform base domain. See
+`requirements.md` and `product-requirements.md` for the active requirements;
+this amendment supersedes prior answers where they included authentication,
+membership/roles, tenant-private management, or an authenticated proxy.
+
+Your answers are recorded below, and the Security Baseline, Resiliency
+Baseline, and Property-Based Testing extensions are enabled. The requested
+clarifications are complete. Exact RTO/RPO values and GDPR retention/access
+rules remain production-readiness decisions, not MVP blockers. Accepted
+decisions remain in force; in particular, GitHub Actions and Terraform remain
+the delivery standards, and tenant isolation and GDPR compliance are
+constraints.
+
+Answers are recorded in the `[Answer]:` tags below.
 
 ## Question 1: MVP capabilities
 You selected an MVP requirements baseline. Which capabilities must be included
@@ -67,7 +78,7 @@ D) 99.99%
 
 X) Other (provide the target and measurement period after `[Answer]:` below)
 
-[Answer]:
+[Answer]: x - the target is 1% the reason being during mvp build we may turn it off and on to reduce operation costs as development/testing in environments is not consistent so it does not make sense to keep them running for no reason with no customers and no testing going on, later this will be changed to option C when fit for production customer traffic
 
 ## Question 4: RTO, RPO, and disaster recovery strategy
 What are your Recovery Time Objective (RTO) and Recovery Point Objective
@@ -92,7 +103,7 @@ with multi-zone availability
 X) Other (describe the strategy and exact maximum RTO/RPO after `[Answer]:`
 below)
 
-[Answer]:
+[Answer]: x - for now while building mvp it is not a concern but we will target C when fit for production traffic
 
 ## Question 5: Change management
 How should production changes be governed?
@@ -106,7 +117,7 @@ C) The workload is exempt from formal change management; provide the rationale
 
 X) Other (please describe after `[Answer]:` below)
 
-[Answer]:
+[Answer]:b - change record is applied in github in the most appropriate manner for visibility
 
 ## Question 6: Production rollback
 How should a failed production deployment be rolled back?
@@ -124,7 +135,7 @@ E) Use an existing organizational rollback procedure; provide its reference
 
 X) Other (please describe after `[Answer]:` below)
 
-[Answer]:
+[Answer]:a
 
 ## Question 7: Production deployment style
 Which production deployment strategy is acceptable for the MVP?
@@ -139,7 +150,7 @@ D) Canary deployment with progressive traffic shift
 
 X) Other (please describe after `[Answer]:` below)
 
-[Answer]:
+[Answer]:d
 
 ## Question 8: Regional topology
 Does the production workload require multi-region deployment, or is
@@ -156,7 +167,7 @@ failover downtime
 
 X) Other (please describe after `[Answer]:` below)
 
-[Answer]:
+[Answer]:a
 
 ## Question 9: GDPR and log retention
 You requested minimum request records and deferred broader auditability,
@@ -176,7 +187,7 @@ needs; describe retention, access, and the review deadline
 
 X) Other (please describe after `[Answer]:` below)
 
-[Answer]:
+[Answer]:a
 
 ## Question 10: Incident response
 How are production incidents handled?
@@ -188,4 +199,43 @@ Correction of Errors (COE) process
 
 X) Other (please describe after `[Answer]:` below)
 
-[Answer]:
+[Answer]:b - this is handled by humans for now, and documented outside the scope of github, this may change later
+
+## Question 11: Platform-side proxy failures
+You selected HTTP 200 for completed upstream responses. This question is only
+about platform-side failures such as invalid requests, rejected consumer API
+keys, upstream transport failures, and timeouts. Please confirm or adjust the
+proposed status codes, and specify the error response shape.
+
+A) Use 400 for invalid requests, 401 for missing or invalid API keys, 403 for
+unauthorized requests, 502 for upstream transport failures, and 504 for
+timeouts; return a JSON platform error object
+
+B) Use a custom status mapping or error response shape; describe it after
+`[Answer]:` below
+
+X) Other (describe the status codes and error response shape after
+`[Answer]:` below)
+
+[Answer]:a
+
+Specify the upstream response handling for the content included under
+`connector`:
+- Whether to forward upstream response headers (and which, if only some)
+- Whether to parse JSON when possible and otherwise return text, or preserve
+  the upstream body without parsing
+- The maximum upstream response size
+
+A) Forward no upstream response headers; parse valid JSON and otherwise
+return text; impose a 10 MB maximum upstream response size
+
+B) Forward an allowlist of upstream response headers; parse valid JSON and
+otherwise return text; impose a 10 MB maximum upstream response size
+
+C) Preserve upstream response headers and body without parsing; specify the
+maximum upstream response size after `[Answer]:` below
+
+X) Other (describe the header-forwarding policy, body representation, and
+maximum response size after `[Answer]:` below)
+
+[Answer]: A, with a 0.5 MB maximum upstream response size
