@@ -19,6 +19,15 @@ removes, or changes a required build, test, dependency, or delivery step.
 - Grant workflow permissions only as needed. Keep secrets out of logs,
   artifacts, and PR-controlled code paths.
 
+## Current staging deployment (implemented)
+
+- `deploy-staging.yml` applies Terraform, smoke-tests `/api/ready`, then runs
+  the Bruno API collection against the staging URL.
+- The shared non-production Cloud SQL instance is leased. `renew-lease.sh`
+  calls the lease controller's `/renew` and waits on the returned Cloud SQL
+  operation via `/status?operation=`; instance state alone is unreliable
+  because a stopped instance still reports `RUNNABLE`.
+
 ## Evolving the pipeline
 
 As applications and suites grow:

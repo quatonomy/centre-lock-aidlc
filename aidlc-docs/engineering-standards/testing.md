@@ -46,6 +46,15 @@ behavior:
 - Run the collection through the Bruno CLI in CI against isolated test
   resources. Use Compose services and controlled fixtures; do not call live
   third-party services.
+- Tag requests that are safe and stable to run repeatedly against a deployed
+  environment as `stability` (currently health, integration catalog, OpenAPI
+  documents, and Swagger). `npm run test:stability --prefix tests/api` runs
+  only those requests against `BASE_URL`.
+- The staging deployment workflow (`deploy-staging.yml`) runs
+  `npm run test:deployed` against the deployed staging URL after the readiness
+  smoke test. That script no longer excludes `live`-tagged requests, so the
+  staging run includes live third-party smoke cases; this is implemented
+  behavior, not an accepted exception to the controlled-fixture rule above.
 - Review adjacent requests when a shared contract or authorization behavior
   changes so the collection remains consistent with the API.
 
