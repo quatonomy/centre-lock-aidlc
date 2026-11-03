@@ -111,6 +111,7 @@ Text alternative: The Development-only endpoint resolves an enabled catalog entr
 - **Local deployment**: Compose defines API, UI, and PostgreSQL services. The web Nginx configuration proxies `/api` and `/swagger` to the API service.
 - **CI**: `.github/workflows/ci.yml` runs .NET formatting and tests, PostgreSQL-backed tests, Compose/Bruno checks, and separate web lint/build/Playwright checks with npm audits.
 - **Context-review dispatch**: `.github/workflows/cd.yml` dispatches `context-update-review.yml` on pushes to `main`, passing the source commit SHA; it does not deploy the application.
+- **Staging deploy and shared database lease** (added after this analysis; verify in source): `.github/workflows/deploy-staging.yml` smoke-tests `/api/ready` and then runs the Bruno collection against the staging URL (`test:deployed`). `.github/scripts/renew-lease.sh` renews the shared non-production Cloud SQL lease through the lease controller (`infrastructure/shared/lease_controller/main.py`) and waits on the operation returned by `/renew` (`/status?operation=`), because a stopped instance still reports state `RUNNABLE`.
 - **Not present**: No Terraform files, cloud resources, hosting-provider configuration, PR deployment environments, or production promotion workflow are tracked.
 - **Networking**: Local ports are API `8080`, UI `5173`, and PostgreSQL `5432`. These are development settings, not production deployment requirements.
 

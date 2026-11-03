@@ -46,6 +46,12 @@ behavior:
 - Run the collection through the Bruno CLI in CI against isolated test
   resources. Use Compose services and controlled fixtures; do not call live
   third-party services.
+- Tag requests that are safe to run repeatedly against a deployed
+  environment as `stability` (`npm run test:stability --prefix tests/api`
+  with `BASE_URL`). The staging deploy workflow runs the collection through
+  `npm run test:deployed` against the deployed URL; this script no longer
+  excludes `live`-tagged requests, so tag any request that must not run
+  against staging accordingly.
 - Review adjacent requests when a shared contract or authorization behavior
   changes so the collection remains consistent with the API.
 
